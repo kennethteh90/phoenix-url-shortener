@@ -1,4 +1,25 @@
-# Urlshortener
+Heroku link: https://gentle-depths-18862.herokuapp.com/links
+
+# URL-shortener App
+
+This URL-shortener App enables a user to add links to a page that generates shortened URLs.
+
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+* Node.js
+* Mix
+* Elixir
+
+### Installing
+
+Clone the repository
+```
+git clone https://github.com/kennethteh90/phoenix-url-shortener.git
+```
 
 To start your Phoenix server:
 
@@ -9,12 +30,6 @@ To start your Phoenix server:
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+## Authors
 
-## Learn more
-
-  * Official website: http://www.phoenixframework.org/
-  * Guides: http://phoenixframework.org/docs/overview
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+* **Kenneth Teh** - [Kenneth's Github](https://github.com/kennethteh90)
