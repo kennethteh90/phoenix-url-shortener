@@ -18,9 +18,8 @@ defmodule UrlshortenerWeb.LinkController do
     case Links.create_link(link_params) do
       {:ok, link} ->
         conn
-        |> put_flash(:info, "Link created successfully. Your shortened link is  #{link_url(conn, :show, link)}" )
-        # |> redirect(to: link_path(conn, :show, link))
-        |> redirect(to: link_path(conn, :index))
+        |> put_flash(:info, "Link created successfully! Your shortened URL is: #{Routes.link_url(conn, :redirect, link.short_code)}")
+        |> redirect(to: Routes.link_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -28,8 +27,19 @@ defmodule UrlshortenerWeb.LinkController do
 
   def show(conn, %{"id" => id}) do
     link = Links.get_link!(id)
-    # render(conn, "show.html", link: link)
-    redirect conn, external: link.fullurl
+    render(conn, "show.html", link: link)
+  end
+
+  def redirect(conn, %{"short_code" => short_code}) do
+    case Links.get_link_by_short_code(short_code) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> render("404.html")
+      link ->
+        Links.increment_clicks(link)
+        redirect(conn, external: link.original_url)
+    end
   end
 
   def edit(conn, %{"id" => id}) do
@@ -45,7 +55,7 @@ defmodule UrlshortenerWeb.LinkController do
       {:ok, link} ->
         conn
         |> put_flash(:info, "Link updated successfully.")
-        |> redirect(to: link_path(conn, :show, link))
+        |> redirect(to: Routes.link_path(conn, :show, link))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", link: link, changeset: changeset)
     end
@@ -57,6 +67,6 @@ defmodule UrlshortenerWeb.LinkController do
 
     conn
     |> put_flash(:info, "Link deleted successfully.")
-    |> redirect(to: link_path(conn, :index))
+    |> redirect(to: Routes.link_path(conn, :index))
   end
 end

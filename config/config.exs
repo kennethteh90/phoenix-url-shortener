@@ -3,7 +3,8 @@
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
-use Mix.Config
+
+import Config
 
 # General application configuration
 config :urlshortener,
@@ -12,16 +13,19 @@ config :urlshortener,
 # Configures the endpoint
 config :urlshortener, UrlshortenerWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "nyVyEtpU8kISXsT6SONrNYOGuDitF9L2+DOEnHY9BbH4orxDdvuArW7PWZZ158vD",
-  render_errors: [view: UrlshortenerWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Urlshortener.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  render_errors: [view: UrlshortenerWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Urlshortener.PubSub,
+  live_view: [signing_salt: "q4lSr4QY"]
 
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{config_env()}.exs"

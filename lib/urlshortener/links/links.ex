@@ -5,7 +5,6 @@ defmodule Urlshortener.Links do
 
   import Ecto.Query, warn: false
   alias Urlshortener.Repo
-
   alias Urlshortener.Links.Link
 
   @doc """
@@ -18,7 +17,9 @@ defmodule Urlshortener.Links do
 
   """
   def list_links do
-    Repo.all(Link)
+    Link
+    |> order_by([l], desc: l.inserted_at)
+    |> Repo.all()
   end
 
   @doc """
@@ -38,6 +39,26 @@ defmodule Urlshortener.Links do
   def get_link!(id), do: Repo.get!(Link, id)
 
   @doc """
+  Gets a link by short code.
+
+  Returns `nil` if the Link does not exist.
+
+  ## Examples
+
+      iex> get_link_by_short_code("abc123")
+      %Link{}
+
+      iex> get_link_by_short_code("nonexistent")
+      nil
+
+  """
+  def get_link_by_short_code(short_code) do
+    Link
+    |> where([l], l.short_code == ^short_code)
+    |> Repo.one()
+  end
+
+  @doc """
   Creates a link.
 
   ## Examples
@@ -50,6 +71,8 @@ defmodule Urlshortener.Links do
 
   """
   def create_link(attrs \\ %{}) do
+    attrs = Map.put_new(attrs, :short_code, Link.generate_short_code())
+    
     %Link{}
     |> Link.changeset(attrs)
     |> Repo.insert()
@@ -70,6 +93,21 @@ defmodule Urlshortener.Links do
   def update_link(%Link{} = link, attrs) do
     link
     |> Link.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Increments the click count for a link.
+
+  ## Examples
+
+      iex> increment_clicks(link)
+      {:ok, %Link{}}
+
+  """
+  def increment_clicks(%Link{} = link) do
+    link
+    |> Ecto.Changeset.change(clicks: link.clicks + 1)
     |> Repo.update()
   end
 
@@ -100,5 +138,21 @@ defmodule Urlshortener.Links do
   """
   def change_link(%Link{} = link) do
     Link.changeset(link, %{})
+  end
+
+  @doc """
+  Returns the most popular links by click count.
+
+  ## Examples
+
+      iex> get_popular_links(10)
+      [%Link{}, ...]
+
+  """
+  def get_popular_links(limit \\ 10) do
+    Link
+    |> order_by([l], desc: l.clicks)
+    |> limit(^limit)
+    |> Repo.all()
   end
 end
