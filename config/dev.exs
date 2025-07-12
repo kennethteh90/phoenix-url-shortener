@@ -1,18 +1,29 @@
-use Mix.Config
+import Config
+
+# Configure your database
+config :urlshortener, Urlshortener.Repo,
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
-# with brunch.io to recompile .js and .css sources.
+# with esbuild to recompile .js and .css sources.
 config :urlshortener, UrlshortenerWeb.Endpoint,
-  http: [port: 4000],
-  debug_errors: true,
-  code_reloader: true,
+  # Binding to loopback ipv4 address prevents access from other machines.
+  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
-  watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin",
-                    cd: Path.expand("../assets", __DIR__)]]
+  code_reloader: true,
+  debug_errors: true,
+  secret_key_base: "nyVyEtpU8kISXsT6SONrNYOGuDitF9L2+DOEnHY9BbH4orxDdvuArW7PWZZ158vD",
+  watchers: [
+    esbuild: {Esbuild, :install_and_run, [:urlshortener, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:urlshortener, ~w(--watch)]}
+  ]
 
 # ## SSL Support
 #
@@ -34,12 +45,15 @@ config :urlshortener, UrlshortenerWeb.Endpoint,
 config :urlshortener, UrlshortenerWeb.Endpoint,
   live_reload: [
     patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{priv/gettext/.*(po)$},
-      ~r{lib/urlshortener_web/views/.*(ex)$},
-      ~r{lib/urlshortener_web/templates/.*(eex)$}
+      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/gettext/.*(po)$",
+      ~r"lib/urlshortener_web/(controllers|live|components)/.*(ex|heex)$",
+      ~r"lib/urlshortener_web/templates/.*(eex)$"
     ]
   ]
+
+# Enable dev routes for dashboard and mailbox
+config :urlshortener, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -48,11 +62,5 @@ config :logger, :console, format: "[$level] $message\n"
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-# Configure your database
-config :urlshortener, Urlshortener.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "urlshortener_dev",
-  hostname: "localhost",
-  pool_size: 10
+# Initialize plugs at runtime for faster development compilation
+config :phoenix, :plug_init_mode, :runtime
